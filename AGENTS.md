@@ -1013,3 +1013,180 @@ ls -la .env
 
 **@grok bridge enhances the 3-agent system without adding complexity. Use for tasks where Grok's unique capabilities provide clear value over existing agents.**
 
+
+---
+
+## Model Switching Protocol v2.1 - Per-Agent Model Enforcement
+
+**Status:** ✅ Implemented 2026-04-18  
+**Problem Solved:** Sub-agents inheriting parent model instead of using configured preferred models  
+**Root Cause:** Spawn calls without explicit model parameter default to parent session model
+
+### **New Rule: Mandatory Preferred Model Usage**
+
+**When spawning ANY agent (@quality, @content, @grok):**
+1. **ALWAYS** explicitly pass `model=agent.preferred_model` from `agent-directory.json`
+2. **NEVER** rely on default inheritance behavior
+3. **ALWAYS** verify with `session_status` after spawn
+4. **ALWAYS** update header to show actual runtime model
+
+### **Agent Preferred Models (From agent-directory.json):**
+
+| Agent | Handle | Preferred Model | Purpose |
+|-------|--------|-----------------|---------|
+| Switch | @switch | `deepseek/deepseek-chat` | Cost-effective coordination, routing, execution |
+| QualityGuardian | @quality | `anthropic/claude-sonnet-4-5` | Complex quality analysis, validation, metrics |
+| Content | @content | `google/gemini-2.5-flash` | Content creation, documentation, GitHub showcases |
+| Grok Bridge | @grok | `grok-4.20-reasoning` | Complex reasoning, creative writing, deep analysis |
+
+### **Correct Spawn Pattern:**
+
+```python
+# ❌ WRONG (inherits parent model):
+sessions_spawn(agentId="quality", task="Audit project quality")
+
+# ✅ CORRECT (uses preferred model):
+sessions_spawn(
+    agentId="quality",
+    model="anthropic/claude-sonnet-4-5",  # From agent-directory.json
+    task="Audit project quality"
+)
+```
+
+### **Header/Footer Accuracy Rule:**
+
+**Display Logic:**
+1. **Before showing header:** Run `session_status` to get actual runtime model
+2. **Show in header:** `**Model:** [ACTUAL runtime model from session_status]`
+3. **Never assume:** Don't show configured model if different from runtime
+4. **If mismatch detected:** Log warning and show actual model
+
+**Example Headers (Accurate):**
+```
+**Agent:** QualityGuardian (@quality)
+**Model:** Claude Sonnet 4.5 (anthropic/claude-sonnet-4-5) ✅
+**Time:** 10:59 PM EDT (Saturday)
+**Task:** Quality audit of project-6
+```
+
+### **Inheritance Behavior & Workaround:**
+
+**Default OpenClaw Behavior:**
+- Sub-agents inherit parent session model
+- No automatic model selection based on agent type
+- Configuration (`agent-directory.json`) is informational only
+
+**Protocol v2.1 Workaround:**
+1. **Read** `agent.preferred_model` from `agent-directory.json`
+2. **Explicitly pass** in spawn call: `model=agent.preferred_model`
+3. **Verify** with `session_status` after spawn
+4. **Update header** to show actual runtime model
+
+### **Model Consistency Checker:**
+
+**Script:** `tools/model-consistency-check.sh`
+
+**Purpose:** Verify spawned agent is using correct preferred model
+
+**Usage:**
+```bash
+# After spawning any agent
+bash tools/model-consistency-check.sh agent:quality:subagent:session-id
+
+# Output:
+✅ Model consistency: QualityGuardian using Claude Sonnet 4.5 (matches preferred)
+❌ Model mismatch: QualityGuardian using DeepSeek (should be Claude Sonnet)
+```
+
+### **Implementation Requirements:**
+
+**For All Agent Spawns:**
+1. **Lookup:** Read `agent-directory.json` for `agent.preferred_model`
+2. **Specify:** Include `model=agent.preferred_model` in spawn call
+3. **Verify:** Check `session_status` after spawn completes
+4. **Correct:** If mismatch, note in header and log for debugging
+
+**For Header Generation:**
+1. **Check:** Run `session_status` or equivalent
+2. **Display:** Show actual runtime model
+3. **Note:** Add "(matches preferred)" or "(inherited)" if helpful
+4. **Be truthful:** Never show incorrect model
+
+### **Testing Protocol:**
+
+**Test Case 1: @quality Spawn**
+```bash
+# Spawn @quality without explicit model (should fail test)
+# Spawn @quality WITH model=anthropic/claude-sonnet-4-5 (should pass)
+# Verify header shows Claude Sonnet
+```
+
+**Test Case 2: @content Spawn**
+```bash
+# Spawn @content WITH model=google/gemini-2.5-flash
+# Verify header shows Gemini 2.5 Flash
+```
+
+**Test Case 3: Header Accuracy**
+```bash
+# Check session_status after any spawn
+# Compare header model vs. actual runtime model
+# Must match 100%
+```
+
+### **Error Handling:**
+
+**Model Mismatch Detected:**
+1. **Log:** `model-mismatch-YYYY-MM-DD.log`
+2. **Alert:** Show warning in response
+3. **Show truth:** Header displays actual runtime model
+4. **Fix:** Update spawn logic to include preferred model
+
+**Preferred Model Missing:**
+1. **Default:** Use agent's existing `model` field
+2. **Log:** `missing-preferred-model.log`
+3. **Fix:** Update `agent-directory.json`
+
+### **Integration with Existing Systems:**
+
+**With Health Monitoring:**
+- Add model consistency check to daily health checks
+- Report model mismatches as warnings
+- Track consistency over time
+
+**With Quality Equation:**
+- Model selection affects quality score (10% weight)
+- Correct model usage improves quality metrics
+- Track model appropriateness per task type
+
+**With Dashboard:**
+- Display actual runtime models for all active agents
+- Show model consistency status
+- Highlight mismatches for attention
+
+### **Quick Reference:**
+
+**Always Do:**
+1. `model=agent.preferred_model` in spawn calls
+2. `session_status` verification after spawn
+3. Header shows actual runtime model
+4. Log mismatches for debugging
+
+**Never Do:**
+1. Rely on default inheritance
+2. Assume model without verification
+3. Show incorrect model in header
+4. Ignore model mismatches
+
+### **Compliance Checklist:**
+
+- [ ] All spawn calls include `model=agent.preferred_model`
+- [ ] Headers show actual runtime model (verified)
+- [ ] Model consistency checker runs after spawns
+- [ ] Mismatches logged and addressed
+- [ ] Documentation updated with Protocol v2.1
+
+---
+
+**Protocol v2.1 ensures:** Correct model usage per agent specialty, accurate headers, and consistent quality across the 3-agent system.
+
