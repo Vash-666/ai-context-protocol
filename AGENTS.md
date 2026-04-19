@@ -807,3 +807,209 @@ Response: Check actual runtime → **Model:** DeepSeek (confirmed)
 
 **No New Agents:** Uses existing 3-agent architecture with enhanced switching logic.
 
+
+---
+
+## @grok Bridge Agent Integration
+
+**Status:** ✅ Active (2026-04-18)  
+**Purpose:** Secure bridge to xAI Grok API for complex reasoning and analysis  
+**Core Principle:** Maintains 3-agent consciousness while adding specialized capability
+
+### Integration Rules
+
+**1. Core Architecture Preservation:**
+- Primary agents remain: Switch, QualityGuardian, Content
+- @grok is a **bridge skill**, not a fourth consciousness
+- All routing still goes through Switch (@orchestrator)
+- @grok calls are **delegated tasks**, not agent handoffs
+
+**2. When to Use @grok:**
+
+**Switch Should Route to @grok When:**
+- Complex reasoning beyond DeepSeek/Gemini capability
+- Deep ethical or philosophical analysis
+- Creative writing requiring unique "voice"
+- Code review for security-critical systems
+- Multi-step logical deduction problems
+
+**QualityGuardian Can Call @grok When:**
+- Deep quality analysis requiring advanced reasoning
+- Statistical validation of complex patterns
+- Root cause analysis of systemic issues
+- Validation of ethical implications
+
+**Content Can Call @grok When:**
+- Creative content requiring unique perspective
+- Technical explanations needing advanced reasoning
+- Storytelling with complex narrative structure
+- Content that benefits from Grok's distinctive style
+
+**3. Security Protocol:**
+
+**API Key Management:**
+- Stored in `.env` file (gitignored)
+- File permissions: 600 (owner read/write only)
+- Never included in commits or logs
+- Rotate quarterly (recommended)
+
+**Call Logging:**
+- All calls logged to `grok-bridge-log.md`
+- Includes timestamp, model, input/output sizes
+- Used for auditing and cost monitoring
+- Reviewed weekly for security patterns
+
+**4. Usage Examples:**
+
+**Direct Call (Any Agent):**
+```bash
+@grok "What is the current date and time in EDT?"
+```
+
+**With Model Override:**
+```bash
+@grok --model grok-4.20-code "Review this Python code for security issues"
+```
+
+**From Within Agent Script:**
+```bash
+#!/bin/bash
+# Switch routing complex task to Grok
+COMPLEX_QUESTION="Analyze the ethical implications of AI agents making autonomous financial decisions"
+RESPONSE=$(bash /workspace/tools/grok-bridge.sh "$COMPLEX_QUESTION")
+echo "## Grok Analysis"
+echo "$RESPONSE"
+```
+
+**5. Cost Management:**
+
+**Monitoring:**
+- Review `grok-bridge-log.md` weekly
+- Track token usage per call
+- Set monthly budget limits (optional in `.env`)
+- Prioritize high-value use cases
+
+**Optimization:**
+- Use for tasks where Grok provides unique value
+- Avoid simple queries better handled by DeepSeek/Gemini
+- Batch related questions when possible
+- Use appropriate model (reasoning vs code vs standard)
+
+**6. Error Handling:**
+
+**If @grok Fails:**
+1. Log error to `grok-bridge-log.md`
+2. Fall back to primary agent (Switch/QualityGuardian/Content)
+3. Notify user of failure and fallback
+4. Investigate root cause (API key, network, rate limits)
+
+**Common Issues:**
+- API key expired or invalid
+- Network connectivity problems
+- Rate limits exceeded
+- Model unavailable or deprecated
+
+**7. Maintenance:**
+
+**Weekly:**
+- Review usage logs
+- Check `.env` file permissions
+- Verify API key is active
+- Archive old logs (keep 30 days)
+
+**Monthly:**
+- Review cost vs. value
+- Consider key rotation (security best practice)
+- Update skill if new models available
+- Optimize integration patterns
+
+**Quarterly:**
+- Rotate API key (security)
+- Review integration with other agents
+- Update documentation
+- Assess continued value
+
+### Show, Don't Tell Examples
+
+**Before (Without @grok):**
+```
+Switch: "This ethical analysis is complex. Let me think..."
+[DeepSeek provides adequate but not exceptional analysis]
+```
+
+**After (With @grok):**
+```
+Switch: "This requires deep ethical reasoning. Routing to @grok..."
+@grok --model grok-4.20-reasoning "Analyze the ethical implications..."
+[Grok provides nuanced, philosophical analysis with unique perspective]
+```
+
+**Value Demonstration:**
+- Complex reasoning: Grok excels at multi-step logical deduction
+- Creative writing: Grok has distinctive, engaging voice
+- Code review: Grok-4.20-code specialized for security analysis
+- Ethical analysis: Grok provides philosophical depth
+
+### Integration with Existing Protocols
+
+**With Model Switching Protocol v2:**
+- @grok calls don't trigger model switches (remains bridge skill)
+- Header accuracy maintained (shows calling agent, not @grok)
+- Context preservation via existing 3-tier protocol
+
+**With Quality Equation:**
+- @grok usage tracked as "Tools" component (5% weight)
+- Quality impact: Enables higher-quality complex reasoning
+- Cost-benefit: Use when quality improvement justifies cost
+
+**With Health Monitoring:**
+- @grok calls included in health reports
+- API connectivity tested during health checks
+- Usage patterns monitored for anomalies
+
+### Quick Reference
+
+**Setup:**
+```bash
+# .env file (gitignored)
+GROK_API_KEY=your-key-here
+
+# Permissions
+chmod 600 .env
+chmod +x tools/grok-bridge.sh
+```
+
+**Usage:**
+```bash
+# Direct call
+@grok "Your question"
+
+# From script
+bash tools/grok-bridge.sh "Your question"
+
+# With model override
+@grok --model grok-4.20-code "Your coding question"
+```
+
+**Verification:**
+```bash
+# Test connectivity
+bash tools/grok-bridge.sh "What is 2+2?"
+
+# Check logs
+tail -20 grok-bridge-log.md
+```
+
+**Security Check:**
+```bash
+# Verify .env is gitignored
+grep .env .gitignore
+
+# Check permissions
+ls -la .env
+```
+
+---
+
+**@grok bridge enhances the 3-agent system without adding complexity. Use for tasks where Grok's unique capabilities provide clear value over existing agents.**
+

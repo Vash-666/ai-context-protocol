@@ -1,0 +1,310 @@
+{
+  "version": "1.1",
+  "updated": "2026-04-18T19:15:00.000000",
+  "protocol": "Multi-Agent Routing Protocol v1.0",
+  "changelog": "2026-04-18: Quality Cut - Consolidated ScriptCraft + SocialMediaMaster into Content agent | 2026-04-18: Added @grok bridge agent for xAI Grok API",
+  "agents": {
+    "switch": {
+      "id": "main",
+      "name": "Switch",
+      "handle": "@switch",
+      "aliases": [
+        "chief",
+        "orchestrator",
+        "main",
+        "coordinator",
+        "boss"
+      ],
+      "role": "Chief Orchestrator",
+      "model": "deepseek/deepseek-chat",
+      "default": true,
+      "channels": [
+        "webchat",
+        "telegram"
+      ],
+      "status": "active",
+      "quality": 8.9,
+      "skills": [
+        "strategy",
+        "coordination",
+        "execution",
+        "planning",
+        "routing"
+      ],
+      "description": "Primary agent for coordination, strategy, and default routing",
+      "created": "2026-02-25",
+      "last_active": "2026-04-18T19:15:00.000000"
+    },
+    "content": {
+      "id": "content",
+      "name": "Content",
+      "handle": "@content",
+      "aliases": [
+        "scriptcraft",
+        "script",
+        "social",
+        "marketing",
+        "media",
+        "promotion",
+        "brand",
+        "video",
+        "teaching",
+        "story",
+        "creator"
+      ],
+      "role": "Unified Content Creation Agent",
+      "model": "google/gemini-2.5-flash",
+      "default": false,
+      "channels": [
+        "webchat",
+        "telegram"
+      ],
+      "status": "active",
+      "quality": 8.4,
+      "skills": [
+        "script_writing",
+        "video_content",
+        "teaching_materials",
+        "storytelling",
+        "platform_optimization",
+        "social_media",
+        "content_creation",
+        "promotion",
+        "marketing",
+        "brand_strategy"
+      ],
+      "description": "Unified content creation agent combining script writing and social media marketing. Handles video scripts, teaching materials, social media posts, and brand content.",
+      "created": "2026-04-18",
+      "last_active": "2026-04-18T19:15:00.000000",
+      "consolidated_from": [
+        "ScriptCraft (8.5/10)",
+        "SocialMediaMaster (8.3/10)"
+      ],
+      "consolidation_date": "2026-04-18",
+      "brand_position": "The guy who actually builds and documents agentic AI systems from scratch \u2014 transparent, practical, and recruiter-ready",
+      "content_guidelines": "Build in public, show process including mistakes, professional yet approachable tone, no hype, teach Quality Equation and small-company model",
+      "target_audience": "Recruiters/hiring managers + technical professionals learning agentic AI",
+      "workflow": {
+        "script_creation": "Create teaching scripts and video content (ScriptCraft function)",
+        "social_media": "Transform scripts into platform-optimized posts (SocialMediaMaster function)",
+        "platforms": [
+          "GitHub (primary - high ROI)",
+          "LinkedIn (secondary)",
+          "X/Twitter (secondary)",
+          "Instagram (carousel format)",
+          "WhatsApp (broadcast)"
+        ]
+      },
+      "content_queue": [
+        {
+          "platform": "GitHub",
+          "type": "showcase",
+          "topic": "Quality Cut refinement process",
+          "status": "pending"
+        },
+        {
+          "platform": "LinkedIn",
+          "type": "article",
+          "topic": "Building multi-agent systems with OpenClaw",
+          "status": "ready"
+        }
+      ],
+      "performance_metrics": {
+        "scripts_created": 4,
+        "social_posts": 3,
+        "platforms_covered": 5,
+        "quality_score": 8.4,
+        "readiness": "active"
+      }
+    },
+    "qualityguardian": {
+      "id": "qualityguardian",
+      "name": "QualityGuardian",
+      "handle": "@quality",
+      "aliases": [
+        "audit",
+        "guardian",
+        "validation",
+        "metrics",
+        "score"
+      ],
+      "role": "System-wide Quality Auditor & Continuous Improver",
+      "model": "anthropic/claude-sonnet-4-5",
+      "default": false,
+      "channels": [
+        "webchat",
+        "telegram"
+      ],
+      "status": "active",
+      "quality": 9.2,
+      "skills": [
+        "vector_embeddings",
+        "similarity_scoring",
+        "statistical_validation",
+        "root_cause_analysis",
+        "quality_optimization"
+      ],
+      "description": "Dedicated quality assurance agent with mathematical rigor. Operates on Quality In \u2192 Quality Out principle with vector-based validation. Optimized with chunking strategy for complex evaluations.",
+      "created": "2026-04-16",
+      "last_active": "2026-04-18T19:04:00.000000",
+      "optimized": "2026-04-18",
+      "core_value": "Ruthless pursuit of Quality In \u2192 Quality Out",
+      "methodology": "Vector embeddings, similarity scoring (\u22650.92 good, <0.85 needs improvement), statistical validation, drift detection, Quality Equation optimization",
+      "quality_thresholds": {
+        "similarity_score": 0.92,
+        "quality_equation": 8.5,
+        "context_preservation": 1.0,
+        "token_efficiency": "optimized"
+      },
+      "audit_schedule": {
+        "light_scan": "every 4 hours",
+        "full_audit": "every 24 hours",
+        "model_switch": "immediate",
+        "new_creation": "instant"
+      },
+      "chunking_strategy": {
+        "enabled": true,
+        "max_chunk_time": "5 minutes",
+        "single_responsibility": true,
+        "pre_compute_heavy_ops": true,
+        "timeout_protection": true,
+        "circuit_breaker": "3 failures max"
+      }
+    },
+    "grok": {
+      "id": "grok",
+      "name": "Grok Bridge",
+      "handle": "@grok",
+      "aliases": [
+        "xai",
+        "reasoning",
+        "analysis",
+        "deep-think"
+      ],
+      "role": "Secure xAI Grok API Bridge",
+      "model": "grok-4.20-reasoning",
+      "default": false,
+      "channels": [
+        "webchat",
+        "telegram"
+      ],
+      "status": "active",
+      "quality": 9.0,
+      "skills": [
+        "complex_reasoning",
+        "deep_analysis",
+        "creative_writing",
+        "code_review",
+        "ethical_analysis"
+      ],
+      "description": "Secure bridge to xAI Grok API for complex reasoning, analysis, and creative tasks. API key stored securely in .env file.",
+      "created": "2026-04-18",
+      "last_active": "2026-04-18T22:10:00.000000",
+      "security": {
+        "api_key_storage": ".env file (gitignored)",
+        "permissions": "600 (owner read/write only)",
+        "logging": "grok-bridge-log.md",
+        "audit": "automatic per call"
+      },
+      "models": {
+        "default": "grok-4.20-reasoning",
+        "alternatives": [
+          "grok-4.20",
+          "grok-4.20-vision",
+          "grok-4.20-code"
+        ]
+      },
+      "usage": {
+        "direct_call": "@grok \"Your question\"",
+        "model_override": "@grok --model grok-4.20-code \"Your question\"",
+        "script": "bash /workspace/tools/grok-bridge.sh \"Your question\""
+      },
+      "integration": {
+        "with_switch": "Route complex reasoning tasks",
+        "with_quality": "Deep quality analysis",
+        "with_content": "Creative content generation"
+      }
+    }
+  },
+  "routing": {
+    "default_agent": "switch",
+    "mention_prefix": "@",
+    "case_sensitive": false,
+    "fallback_enabled": true,
+    "channel_bindings": {
+      "webchat": "switch"
+    },
+    "rules": [
+      "Rule 1: Default to Switch if no agent mentioned",
+      "Rule 2: @mentions have highest priority",
+      "Rule 3: Channel bindings suggest default but don't override @mentions",
+      "Rule 4: Fallback to Switch if agent unavailable",
+      "Rule 5: Unified session - all responses in main conversation"
+    ]
+  },
+  "handoff_protocol": {
+    "enabled": true,
+    "context_transfer": true,
+    "notification": true,
+    "logging": true,
+    "files": {
+      "session_context": "/Users/rohitvashist/.openclaw/workspace/SESSION-CONTEXT.md",
+      "handoff_log": "/Users/rohitvashist/.openclaw/workspace/handoff-log.json"
+    }
+  },
+  "monitoring": {
+    "dashboard_url": "http://localhost:18789",
+    "metrics_tracked": [
+      "routing_decisions",
+      "response_times",
+      "handoff_success",
+      "agent_quality"
+    ],
+    "update_frequency": "hourly"
+  },
+  "decommissioned": {
+    "agents": [
+      {
+        "id": "scriptcraft",
+        "name": "ScriptCraft",
+        "reason": "Consolidated into Content agent",
+        "date": "2026-04-18",
+        "quality_at_decommission": 8.5,
+        "merged_into": "content"
+      },
+      {
+        "id": "socialmediamaster",
+        "name": "SocialMediaMaster",
+        "reason": "Consolidated into Content agent",
+        "date": "2026-04-18",
+        "quality_at_decommission": 8.3,
+        "merged_into": "content"
+      }
+    ],
+    "channels": [
+      {
+        "name": "signal",
+        "reason": "Unstable, high maintenance, low value",
+        "date": "2026-04-18",
+        "quality_at_decommission": 5.5,
+        "replaced_by": "Telegram (primary) + WebChat (backup)"
+      }
+    ]
+  },
+  "quality_cut_info": {
+    "date": "2026-04-18",
+    "phase": "Option A - Conservative Refinement",
+    "agents_before": 6,
+    "agents_after": 3,
+    "reduction": "50%",
+    "quality_before": 8.08,
+    "quality_target": "9.0-9.3",
+    "improvements": [
+      "Vector retriever optimized (545x faster)",
+      "Content agents consolidated (reduced overlap)",
+      "Signal decommissioned (removed instability)",
+      "@quality optimized (chunking strategy)",
+      "Social media deprioritized (focus on GitHub)"
+    ]
+  }
+}
