@@ -467,3 +467,72 @@ _Last updated: 2026-04-18 Evening_
 
 **Status:** Production-ready, lean architecture, optimized performance, comprehensive documentation.
 
+
+---
+
+## Memory Curation Protocol (Weekly - Every Friday)
+
+**Goal:** Transform raw daily logs into strategic long-term memory
+
+### Process (30 minutes)
+
+**Step 1: Review Daily Logs (10 min)**
+- Read last 7 days: `memory/2026-04-12.md` through `memory/2026-04-18.md`
+- Identify patterns, recurring themes
+- Note significant events, decisions, breakthroughs
+
+**Step 2: Distill Strategic Insights (10 min)**
+- Extract lessons learned
+- Document decisions worth remembering
+- Identify changed priorities or context
+- Note new capabilities or limitations discovered
+
+**Step 3: Update MEMORY.md (10 min)**
+- Add new insights to relevant sections
+- Update project status (if changed)
+- Remove outdated information
+- Tighten language (show, don't tell)
+
+**Step 4: Verify Quality**
+- Check clarity (can future-you understand this?)
+- Verify accuracy (facts correct?)
+- Ensure security (no API keys, personal data safe?)
+
+### Guidelines
+
+**Include:**
+- Strategic decisions and their reasoning
+- Key technical achievements with metrics
+- Important lessons learned
+- Changed context (new tools, decommissioned features)
+- Ongoing projects status updates
+
+**Exclude:**
+- Routine daily activity
+- Temporary context (already in daily logs)
+- Secrets (API keys → env-secrets.sh only)
+- Outdated information from previous weeks
+
+**Quality Standards:**
+- Maximum truth density (every sentence adds value)
+- Show, don't tell (metrics, examples, concrete facts)
+- Professional tone (recruiter-ready)
+- Clear organization (easy to find information)
+
+### Impact on Quality Equation
+
+**Memory Component Weight:** 20%
+
+**Improvement Path:**
+- Weekly curation: 7.03 → 8.0 (+0.19 pts overall)
+- Monthly major updates: 8.0 → 9.0 (+0.20 pts overall)
+- Total potential: +0.39 pts overall quality
+
+**ROI:** 30 min/week = +0.39 pts overall quality (20% weight × 2 point improvement)
+
+### Next Scheduled Curation
+
+**Date:** 2026-04-25 (Friday)  
+**Scope:** April 18-25 daily logs  
+**Focus:** Quality Cut learnings, prompt file upgrades, GitHub profile work
+
