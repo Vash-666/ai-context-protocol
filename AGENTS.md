@@ -580,3 +580,230 @@ bash tools/automated-health-monitor.sh
 
 **No New Agents:** Uses existing Switch agent (@monitor capability) with existing tools
 
+
+---
+
+## Model & Agent Switching Protocol v2
+
+**Status:** ✅ New feature (2026-04-18)  
+**Goal:** Unified model/agent switching with accurate headers and 3-tier context preservation  
+**Problem Solved:** Header/footer mismatches, unclear switching commands, inconsistent context preservation
+
+### Detection Phrases
+
+**Model Switching:**
+- "switch to [model]" (e.g., "switch to Gemini", "switch to Sonnet", "switch to DeepSeek")
+- "use [model]" (e.g., "use Gemini for this", "use DeepSeek now")
+- "change model to [model]"
+- "model: [model]" (e.g., "model: gemini-flash")
+
+**Agent-Specific Switching:**
+- "use [model] for @agent" (e.g., "use Gemini for @content")
+- "@agent switch to [model]" (e.g., "@quality switch to Sonnet")
+- "[model] for @agent" (e.g., "Sonnet for @quality")
+
+**Default Models (Per Agent):**
+- **Switch (@orchestrator):** DeepSeek (deepseek/deepseek-chat) - cost-effective
+- **QualityGuardian (@quality):** Claude Sonnet 4.5 (anthropic/claude-sonnet-4-5) - complex analysis
+- **Content:** Gemini 2.5 Flash (google/gemini-2.5-flash) - balance quality/cost
+
+### Protocol v2 (Always Execute)
+
+**When ANY switch request detected:**
+
+**Step 1: 3-Tier Context Preservation**
+1. **TIER 1:** Update `SESSION-CONTEXT.md`
+   - Current model (from runtime)
+   - Target model/agent
+   - Conversation summary (last 10 messages)
+   - Reason for switch
+2. **TIER 2:** Memory flush (if complex task or >80% context)
+   - Update `MEMORY.md` with key decisions
+   - Update `memory/YYYY-MM-DD.md` with raw conversation
+3. **TIER 3:** Smart routing decision
+   - Check if agent-specific (@content, @quality)
+   - Use agent's preferred model if specified
+   - Otherwise use requested model
+
+**Step 2: Generate Exact OpenClaw Command**
+- **Model switch:** `/model [model-alias]`
+- **Model aliases:**
+  - `deepseek` = deepseek/deepseek-chat
+  - `sonnet` = anthropic/claude-sonnet-4-5
+  - `gemini-flash` = google/gemini-2.5-flash
+  - `gemini` = google/gemini-2.5-flash
+
+**Step 3: Update Response Header**
+- **Always show actual runtime model** (check `/status` or session metadata)
+- **Format:** `**Model:** [actual-model] | **Agent:** [agent-name]`
+- **Never assume** - always verify current model
+
+**Step 4: Document Switch in SESSION-CONTEXT.md**
+- Timestamp of switch
+- From model → To model
+- Agent involved (if any)
+- Context preserved (yes/no)
+
+### Response Header Accuracy
+
+**Current Header Format (Always Accurate):**
+```
+**Agent:** [Agent Name]  
+**Model:** [Actual Runtime Model from OpenClaw]  
+**Time:** [Current Time]  
+**Task:** [Brief Task Description]
+```
+
+**How to Get Actual Model:**
+1. Check runtime metadata (provided by OpenClaw)
+2. Run `/status` command (shows current model)
+3. Never assume based on conversation history
+4. If uncertain, show: `**Model:** [Checking...]`
+
+**Example Headers (Accurate):**
+```
+**Agent:** Switch (Chief Orchestrator)  
+**Model:** DeepSeek (deepseek/deepseek-chat)  
+**Time:** 9:54 PM EDT (Saturday)  
+**Task:** Implementing Model Switching v2
+```
+
+```
+**Agent:** Content  
+**Model:** Gemini 2.5 Flash (google/gemini-2.5-flash)  
+**Time:** 9:55 PM EDT (Saturday)  
+**Task:** Generating technical documentation
+```
+
+### Helper Tool: switch-helper.sh
+
+**Location:** `/workspace/tools/switch-helper.sh`
+
+**Purpose:** Automates detection, preservation, and command generation
+
+**Usage:**
+```bash
+# Detect switch request
+cd /Users/rohitvashist/.openclaw/workspace
+bash tools/switch-helper.sh "switch to Gemini for @content"
+
+# Output:
+# 1. Context preserved (SESSION-CONTEXT.md updated)
+# 2. Command: /model gemini-flash
+# 3. Agent routing: @content will use Gemini
+# 4. Header update: Show Gemini as current model
+```
+
+**Features:**
+- Detects 10+ switch phrases
+- Runs 3-tier preservation automatically
+- Outputs exact `/model` command
+- Updates agent routing if specified
+- Logs all switches for audit
+
+### Agent Directory Configuration
+
+**File:** `agent-directory.json`
+
+**Structure:**
+```json
+{
+  "agents": [
+    {
+      "id": "switch",
+      "name": "Switch",
+      "role": "Chief Orchestrator",
+      "preferred_model": "deepseek/deepseek-chat",
+      "description": "Multi-agent coordination, resource allocation"
+    },
+    {
+      "id": "quality",
+      "name": "QualityGuardian",
+      "role": "Quality Assurance",
+      "preferred_model": "anthropic/claude-sonnet-4-5",
+      "description": "Quality audits, similarity scoring, validation"
+    },
+    {
+      "id": "content",
+      "name": "Content",
+      "role": "Content Creation",
+      "preferred_model": "google/gemini-2.5-flash",
+      "description": "GitHub showcases, technical documentation"
+    }
+  ]
+}
+```
+
+### Test Cases
+
+**Case 1: Simple Model Switch**
+```
+User: "switch to Gemini"
+Response:
+1. ✅ Context preserved (3-tier)
+2. Command: /model gemini-flash
+3. Header: **Model:** Gemini 2.5 Flash (after switch)
+```
+
+**Case 2: Agent-Specific Switch**
+```
+User: "use Gemini for @content"
+Response:
+1. ✅ Context preserved
+2. Command: /model gemini-flash
+3. Note: @content will use Gemini for next task
+4. Header: **Model:** Gemini 2.5 Flash | **Agent:** Content
+```
+
+**Case 3: Default Agent Model**
+```
+User: "@quality analyze this"
+Response:
+1. No switch needed (QualityGuardian uses Sonnet by default)
+2. Header: **Model:** Claude Sonnet 4.5 | **Agent:** QualityGuardian
+```
+
+**Case 4: Header Accuracy Verification**
+```
+Before: Header shows DeepSeek
+User: "what model am I using?"
+Response: Check actual runtime → **Model:** DeepSeek (confirmed)
+```
+
+### Implementation Rules
+
+**Always:**
+1. Detect switch phrases (case-insensitive)
+2. Run 3-tier preservation BEFORE any response
+3. Show exact `/model` command needed
+4. Update header with actual runtime model
+5. Document in SESSION-CONTEXT.md
+
+**Never:**
+1. Assume model without verification
+2. Skip context preservation
+3. Show incorrect header
+4. Forget agent-specific preferences
+
+### Quality Assurance
+
+**Validation:**
+- Header matches actual model (100% accuracy target)
+- Context preserved (100% continuity target)
+- Commands are executable (test with `/status`)
+- Agent preferences respected
+
+**Monitoring:**
+- Log all switches to `memory/switch-log-YYYY-MM-DD.md`
+- Track header accuracy (should be 100%)
+- Audit context preservation success rate
+
+### Integration
+
+**With Existing Systems:**
+- HEARTBEAT.md: Add switch accuracy check
+- Daily monitoring: Include switch success rate
+- Quality Equation: Model component (10%) optimized
+
+**No New Agents:** Uses existing 3-agent architecture with enhanced switching logic.
+
