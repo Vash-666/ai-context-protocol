@@ -228,6 +228,36 @@
         "with_content": "Creative content generation"
       },
       "preferred_model": "grok-4.20-reasoning"
+    },
+    "product": {
+      "id": "product",
+      "name": "Product Manager",
+      "handle": "@product",
+      "aliases": [
+        "pm",
+        "backlog",
+        "roadmap",
+        "planning"
+      ],
+      "role": "Backlog & Roadmap Owner",
+      "model": "anthropic/claude-sonnet-4-5",
+      "default": false,
+      "channels": [
+        "webchat"
+      ],
+      "status": "active",
+      "quality": 9.0,
+      "skills": [
+        "backlog_management",
+        "roadmap_planning",
+        "prioritization",
+        "value_measurement",
+        "agent_coordination"
+      ],
+      "description": "Product Manager - owns backlog and roadmap, plans daily sprints, measures value delivered",
+      "created": "2026-04-20",
+      "last_active": "2026-04-20T11:58:00.000000",
+      "preferred_model": "anthropic/claude-sonnet-4-5"
     }
   },
   "routing": {

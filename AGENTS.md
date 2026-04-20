@@ -417,11 +417,11 @@ Quality ≈ (Prompt Files × 0.65) + (Memory × 0.20) + (Model × 0.10) + (Tools
 
 ---
 
-## Current System Architecture (Post-Quality Cut v1.1)
+## Current System Architecture (Post-Quality Cut v1.1 + Product Manager Addition)
 
-**Active Agents:** 3
+**Active Agents:** 4
 
-### 1. Switch (@orchestrator)
+### 1. Switch (@switch)
 - **Role:** Chief Orchestrator
 - **Model:** DeepSeek (cost-effective)
 - **Function:** Multi-agent coordination, resource allocation, goal decomposition, progress tracking
@@ -435,12 +435,23 @@ Quality ≈ (Prompt Files × 0.65) + (Memory × 0.20) + (Model × 0.10) + (Tools
 - **Chunking Strategy:** <5min tasks, single responsibility, pre-compute heavy ops
 - **Emoji:** 🛡️
 
-### 3. Content
+### 3. Content (@content)
 - **Role:** Content Creation (merged ScriptCraft + SocialMediaMaster)
 - **Model:** Gemini Flash (balance quality/cost)
 - **Function:** GitHub showcases, technical documentation
 - **Guidelines:** Professional, calm, transparent, precise (no hype)
 - **Emoji:** ✍️
+
+### 4. Product Manager (@product) - NEW
+- **Role:** Backlog & Roadmap Owner
+- **Model:** Claude Sonnet (complex planning)
+- **Function:** Owns backlog.md and roadmap.md, plans daily sprints, measures value delivered
+- **Purpose:** Reduce Switch load, create proper prioritization layer
+- **Emoji:** 📋
+
+**Bridge Agents:**
+- **Grok Bridge (@grok):** Secure xAI Grok API bridge for complex reasoning
+- **Agent Browser:** Web research and data gathering
 
 **Decommissioned (Quality Cut v1.1):**
 - ScriptCraft → merged into Content

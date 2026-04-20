@@ -40,9 +40,15 @@
 ```
 User: "Create a GitHub showcase for the Quality Equation project"
 ↓
-Switch: Receives request, analyzes complexity, determines needed agents
+Switch: Receives request, routes to @product for prioritization
 ↓
-Switch: Checks agent availability and preferred models
+@product: Adds to backlog, prioritizes based on value and urgency
+↓
+@product: Plans into next available sprint
+↓
+Switch: Receives prioritized task from @product
+↓
+Switch: Analyzes complexity, determines needed agents
 ↓
 Switch: Creates task plan with quality gates and success criteria
 ```
