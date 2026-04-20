@@ -26,6 +26,70 @@
 **Status:** ✅ Production validated (100% context preservation)  
 **ROI:** 5× return ($0.002 cost, saves $0.01+ in re-explanation)
 
+---
+
+## Project Structure & Fragmentation Prevention
+
+**Core Principle:** "Core Consciousness + Departments" structure
+
+### **Organizational Model:**
+```
+/workspace/
+├── Core Consciousness (Always Loaded)
+│   ├── AGENTS.md (this file)
+│   ├── SOUL.md
+│   ├── IDENTITY.md
+│   ├── USER.md
+│   ├── MEMORY.md (main session only)
+│   └── SESSION-CONTEXT.md
+│
+├── Departments (Projects)
+│   └── /projects/
+│       ├── Project-1-Name/
+│       ├── Project-2-Name/
+│       └── Project-N-Name/
+│
+└── Memory System
+    ├── memory/YYYY-MM-DD.md (daily logs)
+    └── memory/session-context/ (archived contexts)
+```
+
+### **Rule 1: All New Projects Go Under /projects/**
+- **✅ Correct:** `/workspace/projects/Agentic AI Project Pipeline MVP-20260419-195408/`
+- **❌ Incorrect:** Random files scattered in workspace root
+- **❌ Incorrect:** New directories created outside /projects/
+
+### **Rule 2: Department Structure**
+Each project is a "department" with:
+- Clear objectives and scope
+- Defined start/end dates
+- Quality gates and success criteria
+- Integration with core consciousness
+
+### **Rule 3: No Project Fragmentation**
+- **One project = One directory** under /projects/
+- **All project files** stay within project directory
+- **Cross-project references** use relative paths
+- **Project completion** includes cleanup and documentation
+
+### **Rule 4: Core Consciousness Integrity**
+- **Never modify** core files from within projects
+- **Read-only access** to AGENTS.md, SOUL.md, etc.
+- **Project-specific rules** stay in project directory
+- **Integration points** documented in project README
+
+### **Rule 5: Memory Integration**
+- **Project milestones** logged to daily memory files
+- **Key learnings** distilled to MEMORY.md (main session)
+- **Session continuity** maintained via SESSION-CONTEXT.md
+- **Quality tracking** integrated with Quality Equation
+
+### **Enforcement:**
+1. **Before creating:** Check if project belongs under /projects/
+2. **During work:** Keep all files within project directory
+3. **After completion:** Archive to /projects/archive/ if needed
+4. **Quality check:** Verify no fragmentation in health monitoring
+
 ### TIER 1: Fast Session Bridge (SESSION-CONTEXT.md)
 
 **Before model switch:**

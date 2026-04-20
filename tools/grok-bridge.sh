@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# Grok Bridge Script
-# Secure wrapper for xAI Grok API
+# Grok Bridge Script v2.1
+# Secure wrapper for xAI Grok API with cost tracking and credit management
 # Usage: bash grok-bridge.sh "Your question"
 #        bash grok-bridge.sh --model grok-4.20-code "Your question"
 #
@@ -12,6 +12,8 @@ set -e
 WORKSPACE="/Users/rohitvashist/.openclaw/workspace"
 ENV_FILE="$WORKSPACE/.env"
 LOG_FILE="$WORKSPACE/grok-bridge-log.md"
+COST_LOG="$WORKSPACE/grok-cost-tracker.jsonl"
+HEALTH_LOG="$WORKSPACE/health-warnings.jsonl"
 API_URL="https://api.x.ai/v1/chat/completions"
 TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S %Z")
 START_TIME=$(date +%s.%N)
@@ -19,6 +21,11 @@ START_TIME=$(date +%s.%N)
 # Default model
 MODEL="grok-4.20-reasoning"
 SYSTEM_PROMPT="You are Grok, an AI assistant created by xAI. Provide helpful, accurate, and engaging responses."
+
+# Cost tracking (estimated USD per million tokens)
+# Source: x.ai pricing (estimated)
+COST_PER_MILLION_INPUT=0.50  # $0.50 per million input tokens
+COST_PER_MILLION_OUTPUT=1.50 # $1.50 per million output tokens
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -131,14 +138,25 @@ if echo "$RESPONSE" | grep -q '"error"'; then
     echo -e "${YELLOW}Code: $ERROR_CODE${NC}"
     
     # Special handling for common errors
-    if [[ "$ERROR_CODE" == "Some resource has been exhausted" ]]; then
+    if [[ "$ERROR_CODE" == "Some resource has been exhausted" ]] || [[ "$ERROR_MSG" == *"credit"* ]] || [[ "$ERROR_MSG" == *"exhausted"* ]]; then
         echo ""
-        echo "ℹ️  This usually means:"
+        echo "⚠️  ⚠️  ⚠️  CREDIT EXHAUSTION DETECTED ⚠️  ⚠️  ⚠️"
+        echo ""
+        echo "ℹ️  This means:"
         echo "   1. Account credits exhausted"
         echo "   2. Monthly spending limit reached"
         echo "   3. Rate limit exceeded"
         echo ""
-        echo "🔧 Solution: Add credits or raise spending limit at x.ai"
+        echo "🔧 **ACTION REQUIRED:**"
+        echo "   1. Visit: https://x.ai/account/billing"
+        echo "   2. Add credits or raise spending limit"
+        echo "   3. Check usage dashboard"
+        echo ""
+        echo "📊 **Current API Key:** ${GROK_API_KEY:0:10}..."
+        echo ""
+        
+        # Log credit exhaustion warning
+        log_credit_exhaustion_warning "$ERROR_MSG" "$ERROR_CODE"
     fi
     
     exit 1
@@ -159,10 +177,22 @@ TOKENS_INPUT=$(echo "$RESPONSE" | grep -o '"prompt_tokens":[0-9]*' | cut -d: -f2
 TOKENS_OUTPUT=$(echo "$RESPONSE" | grep -o '"completion_tokens":[0-9]*' | cut -d: -f2)
 TOKENS_TOTAL=$(echo "$RESPONSE" | grep -o '"total_tokens":[0-9]*' | cut -d: -f2)
 
+# Calculate estimated cost
+ESTIMATED_COST=0
+if [ -n "$TOKENS_INPUT" ] && [ -n "$TOKENS_OUTPUT" ]; then
+    COST_INPUT=$(echo "scale=6; $TOKENS_INPUT * $COST_PER_MILLION_INPUT / 1000000" | bc)
+    COST_OUTPUT=$(echo "scale=6; $TOKENS_OUTPUT * $COST_PER_MILLION_OUTPUT / 1000000" | bc)
+    ESTIMATED_COST=$(echo "scale=6; $COST_INPUT + $COST_OUTPUT" | bc)
+fi
+
 # Format output
 echo -e "${GREEN}🤖 **Grok Response** ($MODEL)${NC}"
 if [ -n "$TOKENS_TOTAL" ]; then
-    echo -e "${BLUE}⏱️ ${RESPONSE_TIME}s | 📊 ${TOKENS_TOTAL} tokens (in:${TOKENS_INPUT:-?}, out:${TOKENS_OUTPUT:-?})${NC}"
+    if [ -n "$ESTIMATED_COST" ] && [ "$ESTIMATED_COST" != "0" ]; then
+        echo -e "${BLUE}⏱️ ${RESPONSE_TIME}s | 📊 ${TOKENS_TOTAL} tokens | 💰 \$${ESTIMATED_COST}${NC}"
+    else
+        echo -e "${BLUE}⏱️ ${RESPONSE_TIME}s | 📊 ${TOKENS_TOTAL} tokens${NC}"
+    fi
 else
     echo -e "${BLUE}⏱️ ${RESPONSE_TIME}s${NC}"
 fi
@@ -174,25 +204,110 @@ echo "---"
 echo "*Model: $MODEL | Time: $TIMESTAMP*"
 
 # Log the call
-mkdir -p "$(dirname "$LOG_FILE")"
-cat >> "$LOG_FILE" <<EOF
-## $TIMESTAMP
+log_grok_call "$USER_MESSAGE" "$GROK_RESPONSE" "$MODEL" "$TIMESTAMP" "$RESPONSE_TIME" "$TOKENS_INPUT" "$TOKENS_OUTPUT" "$TOKENS_TOTAL" "$ESTIMATED_COST"
 
-**Model:** $MODEL  
-**Input:** ${#USER_MESSAGE} chars  
-**Response:** ${#GROK_RESPONSE} chars  
-**Time:** ${RESPONSE_TIME}s  
-**Tokens:** ${TOKENS_TOTAL:-unknown} (in:${TOKENS_INPUT:-?}, out:${TOKENS_OUTPUT:-?})
+echo ""
+echo -e "${GREEN}✅ Logged to: $LOG_FILE${NC}"
+
+# Functions
+function log_grok_call() {
+    local user_message="$1"
+    local grok_response="$2"
+    local model="$3"
+    local timestamp="$4"
+    local response_time="$5"
+    local tokens_input="$6"
+    local tokens_output="$7"
+    local tokens_total="$8"
+    local estimated_cost="$9"
+    
+    mkdir -p "$(dirname "$LOG_FILE")"
+    
+    # Log to markdown file
+    cat >> "$LOG_FILE" <<EOF
+## $timestamp
+
+**Model:** $model  
+**Input:** ${#user_message} chars  
+**Response:** ${#grok_response} chars  
+**Time:** ${response_time}s  
+**Tokens:** ${tokens_total:-unknown} (in:${tokens_input:-?}, out:${tokens_output:-?})  
+**Cost:** \$${estimated_cost:-unknown}
 
 **Question:**  
-$USER_MESSAGE
+$user_message
 
 **Response:**  
-$GROK_RESPONSE
+$grok_response
 
 ---
 
 EOF
+    
+    # Log to cost tracker (JSONL format)
+    if [ -n "$tokens_total" ]; then
+        cat >> "$COST_LOG" <<EOF
+{"timestamp":"$timestamp","model":"$model","tokens_input":${tokens_input:-0},"tokens_output":${tokens_output:-0},"tokens_total":${tokens_total:-0},"estimated_cost":${estimated_cost:-0},"response_time":${response_time},"message_length":${#user_message}}
+EOF
+    fi
+}
 
-echo ""
-echo -e "${GREEN}✅ Logged to: $LOG_FILE${NC}"
+function log_credit_exhaustion_warning() {
+    local error_msg="$1"
+    local error_code="$2"
+    
+    cat >> "$HEALTH_LOG" <<EOF
+{"timestamp":"$(date -u +"%Y-%m-%dT%H:%M:%SZ")","type":"grok_credit_exhaustion","severity":"critical","message":"Grok API credit exhausted: $error_msg","code":"$error_code","action_required":"Add credits at https://x.ai/account/billing","api_key_prefix":"${GROK_API_KEY:0:10}"}
+EOF
+    
+    echo -e "${YELLOW}⚠ Credit exhaustion logged to health monitoring${NC}"
+}
+
+# Health check function (can be called separately)
+function grok_health_check() {
+    echo -e "${BLUE}🔍 Running Grok Bridge Health Check...${NC}"
+    
+    # Check if .env file exists
+    if [ ! -f "$ENV_FILE" ]; then
+        echo -e "${RED}❌ .env file missing${NC}"
+        return 1
+    fi
+    
+    # Check if API key exists
+    if ! grep -q "GROK_API_KEY" "$ENV_FILE"; then
+        echo -e "${RED}❌ GROK_API_KEY not found in .env${NC}"
+        return 1
+    fi
+    
+    # Check API key format
+    GROK_API_KEY=$(grep GROK_API_KEY "$ENV_FILE" | cut -d= -f2- | tr -d ' ' | tr -d '"' | tr -d "'")
+    if [[ ! "$GROK_API_KEY" =~ ^xai- ]]; then
+        echo -e "${YELLOW}⚠ API key format warning${NC}"
+    fi
+    
+    # Check recent cost logs
+    if [ -f "$COST_LOG" ]; then
+        RECENT_COST=$(tail -10 "$COST_LOG" | jq -s 'map(.estimated_cost) | add' 2>/dev/null || echo "0")
+        echo -e "${GREEN}✅ Recent estimated cost: \$${RECENT_COST:-0}${NC}"
+    fi
+    
+    # Check for recent credit exhaustion warnings
+    if [ -f "$HEALTH_LOG" ]; then
+        CREDIT_WARNINGS=$(grep -c "grok_credit_exhaustion" "$HEALTH_LOG" 2>/dev/null || echo "0")
+        if [ "$CREDIT_WARNINGS" -gt 0 ]; then
+            echo -e "${RED}❌ $CREDIT_WARNINGS credit exhaustion warnings detected${NC}"
+            echo "   Check: $HEALTH_LOG"
+        else
+            echo -e "${GREEN}✅ No credit exhaustion warnings${NC}"
+        fi
+    fi
+    
+    echo -e "${GREEN}✅ Grok Bridge health check passed${NC}"
+    return 0
+}
+
+# If script called with --health-check
+if [[ "$1" == "--health-check" ]]; then
+    grok_health_check
+    exit $?
+fi
