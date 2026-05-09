@@ -89,8 +89,8 @@ def analyze_traces(traces: List[Dict[str, Any]]) -> Dict[str, Any]:
         summary["agents"][agent]["events"] += 1
         summary["agents"][agent]["total_cost"] += cost
 
-        if latency:
-            summary["agents"][agent]["latencies"].append(latency)
+        if latency and isinstance(latency, (int, float)):
+            summary["agents"][agent]["latencies"].append(float(latency))
 
         if error:
             summary["agents"][agent]["errors"] += 1
@@ -107,8 +107,8 @@ def analyze_traces(traces: List[Dict[str, Any]]) -> Dict[str, Any]:
     for agent, data in summary["agents"].items():
         latencies = data["latencies"]
         if latencies:
-            data["p50"] = round(statistics.median(latencies), 1)
-            data["p95"] = round(statistics.quantiles(latencies, n=20)[18] if len(latencies) >= 20 else max(latencies), 1)
+            data["p50"] = round(float(statistics.median(latencies)), 1)
+            data["p95"] = round(float(statistics.quantiles(latencies, n=20)[18]) if len(latencies) >= 20 else float(max(latencies)), 1)
         data["error_rate"] = round((data["errors"] / data["events"]) * 100, 2) if data["events"] > 0 else 0
 
     return summary
