@@ -196,11 +196,86 @@ cat traces_2026-05-09.jsonl | \
   jq -s 'add'
 ```
 
+## Priority 2: Task Queue (Worker Pool)
+
+✅ **COMPLETE** — Isolated worker processes with timeout enforcement
+
+### task_queue.py
+
+Replace inline spawn with isolated workers:
+
+```python
+from task_queue import submit_task, get_result
+
+# Submit task (non-blocking)
+task_id = submit_task(
+    agent_name="website_builder",
+    func=build_website,
+    args=("coffee_shop",),
+    kwargs={"theme": "dark"},
+    timeout=300  # 5 minutes max
+)
+
+# Continue immediately — do other work
+
+# Get result later
+result = get_result(task_id, wait=True)
+```
+
+**Features:**
+- **Non-blocking submission** — @switch continues immediately
+- **Isolated worker processes** — Crash isolation, no cascade failures
+- **Per-task timeout enforcement** — SIGALRM-based timeout
+- **Automatic retry** — Configurable retry on failure
+- **Result persistence** — Saved to `task_results/` directory
+- **Tracing integration** — Records task events automatically
+
+### Worker Pool Configuration
+
+```python
+# Max concurrent workers (default: 4)
+MAX_WORKERS = 4
+
+# Default timeout (default: 300s / 5min)
+TASK_TIMEOUT_DEFAULT = 300
+
+# Max retries (default: 2)
+MAX_RETRIES = 2
+```
+
+### Benefits vs Inline Spawn
+
+| Feature | Inline Spawn | Task Queue |
+|---------|--------------|------------|
+| Blocking | ✅ Blocks parent | ✅ Non-blocking |
+| Crash isolation | ❌ Cascade failures | ✅ Worker dies, parent survives |
+| Parallel execution | ❌ Sequential | ✅ Multiple workers |
+| Timeout enforcement | ❌ None | ✅ Per-task timeouts |
+| Resource limits | ❌ None | ✅ Process isolation |
+| Result persistence | ❌ Memory only | ✅ Saved to disk |
+
+### Test Results
+
+```
+🧪 Testing OpenClaw Task Queue...
+Submitting 3 tasks...
+  Task 1: 67d8d062... (coffee_shop)
+  Task 2: e58c18c3... (portfolio)
+  Task 3: 43d119ba... (blog)
+
+✅ 67d8d062... Done: coffee_shop
+✅ e58c18c3... Done: portfolio
+✅ 43d119ba... Done: blog
+```
+
+---
+
 ### Status
 
 ✅ **COMPLETE** — Grok Priority 1 (Execution Tracing)  
 ✅ **COMPLETE** — Priority 1b (Autopsy Agent)  
-🔄 **NEXT** — Priority 2 (Worker Queue)
+✅ **COMPLETE** — Priority 2 (Task Queue / Worker Pool)  
+🔄 **NEXT** — Priority 3 (Scaffolding Kernel + Cache)
 
 ---
 
