@@ -97,15 +97,51 @@ Every trace includes:
 - `timestamp` — ISO 8601 timestamp
 - `error` — Error message if failed
 
-### Next Step: Autopsy Agent
+### Autopsy Agent: trace_analyzer.py
 
-Grok demanded an **autopsy agent** that analyzes failures and suggests fixes.
+✅ **Already installed!** Run it anytime:
 
-This will be Priority 1b — build an agent that:
-1. Reads the trace files
-2. Identifies failure patterns
-3. Suggests prompt/workflow improvements
-4. Generates a daily report
+```bash
+python3 tools/trace_analyzer.py
+```
+
+**Features:**
+- **p50/p95 latency analysis** per agent
+- **Error pattern detection** — groups similar errors
+- **Cost attribution** — total spend per agent
+- **Token usage tracking** — prompt vs completion
+- **Automated suggestions** — retry logic, circuit breakers, input validation
+- **Daily reports** — saved to `traces/autopsy_report_YYYY-MM-DD.md`
+
+**Example Output:**
+```
+╔══════════════════════════════════════════════════════════════════╗
+║           OpenClaw Execution Autopsy Report                      ║
+╚══════════════════════════════════════════════════════════════════╝
+
+📊 Analyzed 6 events across 1 traces
+
+## Agent Performance
+**test_agent**
+  • Events: 5
+  • p50 / p95 latency: 233.7ms / 1240ms
+  • Error rate: 0.0%
+  • Total cost: $0.0021
+
+✅ No errors detected in the analyzed window. Great job!
+
+## 💰 Token & Cost Summary
+  • Total prompt tokens: 850
+  • Total completion tokens: 320
+  • Estimated total cost: $0.0021
+```
+
+**Integration with Health Monitor:**
+Add to your daily health check:
+```bash
+# In automated-health-monitor.sh
+python3 /Users/rohitvashist/.openclaw/workspace/tools/trace_analyzer.py >> "$REPORT_FILE"
+```
 
 ### Integration with Existing System
 
@@ -153,7 +189,8 @@ cat traces_2026-05-09.jsonl | \
 ### Status
 
 ✅ **COMPLETE** — Grok Priority 1 (Execution Tracing)  
-🔄 **NEXT** — Priority 1b (Autopsy Agent)
+✅ **COMPLETE** — Priority 1b (Autopsy Agent)  
+🔄 **NEXT** — Priority 2 (Worker Queue)
 
 ---
 
