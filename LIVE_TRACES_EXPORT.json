@@ -1,0 +1,10 @@
+[
+  {
+    "event_id": "11d69eb2-f832-4b7b-b56e-e380a80cf2b9",
+    "workflow_id": "wf-live-test",
+    "agent": "chaos_test",
+    "event_type": "experiment_started",
+    "timestamp": "2026-05-08 23:53:25.417292-04:00",
+    "sequence": 1
+  }
+]
