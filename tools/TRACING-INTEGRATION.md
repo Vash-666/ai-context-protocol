@@ -97,50 +97,60 @@ Every trace includes:
 - `timestamp` — ISO 8601 timestamp
 - `error` — Error message if failed
 
-### Autopsy Agent: trace_analyzer.py
+### Autopsy Agents
 
-✅ **Already installed!** Run it anytime:
+You now have **two** autopsy tools:
 
+#### 1. trace_analyzer.py (Basic)
 ```bash
 python3 tools/trace_analyzer.py
 ```
+**Features:** Local analysis, p50/p95 latency, cost tracking, basic suggestions
 
-**Features:**
-- **p50/p95 latency analysis** per agent
-- **Error pattern detection** — groups similar errors
-- **Cost attribution** — total spend per agent
-- **Token usage tracking** — prompt vs completion
-- **Automated suggestions** — retry logic, circuit breakers, input validation
-- **Daily reports** — saved to `traces/autopsy_report_YYYY-MM-DD.md`
+#### 2. autopsy_agent.py (Grok-Powered) ⭐ Recommended
+```bash
+python3 tools/autopsy_agent.py
+```
+**Features:** 
+- **Grok API integration** — Intelligent failure analysis
+- **Root cause identification** — AI-powered debugging
+- **Concrete recommendations** — Specific fixes for each failure pattern
+- **Failure clustering** — Groups similar errors automatically
+- **Cost-controlled** — Limits API calls to MAX_FAILURES_TO_ANALYZE (default: 8)
 
 **Example Output:**
 ```
-╔══════════════════════════════════════════════════════════════════╗
-║           OpenClaw Execution Autopsy Report                      ║
-╚══════════════════════════════════════════════════════════════════╝
+# OpenClaw Autopsy Report
+**Generated:** 2026-05-09 03:02 UTC
 
-📊 Analyzed 6 events across 1 traces
+## 🤖 Agent Health Summary
+### test_agent
+- Events: 5
+- Latency (p50 / p95): 233.7ms / 1240ms
+- Error rate: 0.0%
+- Estimated cost: $0.0021
 
-## Agent Performance
-**test_agent**
-  • Events: 5
-  • p50 / p95 latency: 233.7ms / 1240ms
-  • Error rate: 0.0%
-  • Total cost: $0.0021
+## 🔍 Grok's Analysis & Recommendations
+### Failure: scaffolder → build_website
+**Error:** LLM timeout after 30s...
+**Occurrences:** 3
 
-✅ No errors detected in the analyzed window. Great job!
-
-## 💰 Token & Cost Summary
-  • Total prompt tokens: 850
-  • Total completion tokens: 320
-  • Estimated total cost: $0.0021
+**Grok's Suggestions:**
+1. Add retry logic with exponential backoff
+2. Implement circuit breaker for slow LLM calls
+3. Consider using faster model (Gemini Flash) for initial scaffolding
 ```
 
 **Integration with Health Monitor:**
 Add to your daily health check:
 ```bash
 # In automated-health-monitor.sh
-python3 /Users/rohitvashist/.openclaw/workspace/tools/trace_analyzer.py >> "$REPORT_FILE"
+python3 /Users/rohitvashist/.openclaw/workspace/tools/autopsy_agent.py >> "$REPORT_FILE"
+```
+
+**Dry-run mode (no API calls):**
+```bash
+python3 tools/autopsy_agent.py --dry-run
 ```
 
 ### Integration with Existing System
