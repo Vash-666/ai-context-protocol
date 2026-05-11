@@ -21,6 +21,69 @@
 
 ---
 
+## Async Spawn Protocol — P004 (NEW 2026-05-11)
+
+### Non-Blocking Subagent Execution
+**Enable parallel work by spawning subagents asynchronously.**
+
+**When to use async spawn:**
+- Multiple independent tasks that can run in parallel
+- Long-running analysis where parent can do other work
+- Batch operations across multiple agents
+- Fire-and-forget tasks with callback on completion
+
+**Basic Async Spawn:**
+```javascript
+const { sessionsSpawnAsync } = require('./lib/sessions-spawn-async');
+
+// Spawn without blocking
+const future = await sessionsSpawnAsync({
+    agentId: 'quality',
+    task: 'Audit this code',
+    async: true  // ← Non-blocking
+});
+
+// Parent continues immediately...
+await doOtherWork();
+
+// Retrieve result when needed
+const result = await future.getResult();
+```
+
+**Batch Async Spawn:**
+```javascript
+const { batchSpawn } = require('./lib/sessions-spawn-async');
+
+// Spawn multiple agents in parallel
+const futures = await batchSpawn([
+    { agentId: 'quality', task: 'Audit code' },
+    { agentId: 'content', task: 'Write docs' },
+    { agentId: 'product', task: 'Analyze requirements' }
+], true);  // async=true
+
+// Wait for all to complete
+const results = await Promise.all(
+    futures.map(f => f.getResult())
+);
+```
+
+**Configuration:**
+- `timeout`: Maximum execution time (default: 5 minutes)
+- `onComplete`: Callback channel (file path or notification)
+- `priority`: 'high' | 'normal' | 'low' (for queue ordering)
+
+**Limits:**
+- Max concurrent: 8 spawns
+- Max depth: 3 levels (parent → child → grandchild)
+- Token reservation: 120% of estimate (reconciled on completion)
+
+**Completion Handling:**
+- Results stored in `.async-spawn/` directory
+- Completion events pushed to parent (no polling)
+- Failed spawns trigger retry logic (if configured)
+
+---
+
 ## Handoff Protocol — P003 (Updated 2026-05-05)
 
 ### Default: Inline Spawn (No HANDOFF.md)
