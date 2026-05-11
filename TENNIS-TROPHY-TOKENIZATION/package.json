@@ -1,0 +1,21 @@
+{
+  "name": "tennis-trophy-tokenization",
+  "version": "1.0.0",
+  "description": "A complete blockchain prototype for tokenizing a real-world 1947 tennis trophy with all winner names engraved. This project demonstrates RWA (Real World Asset) tokenization from concept to deployed dApp.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^7.0.0",
+    "hardhat": "^3.4.5"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.6.1",
+    "dotenv": "^17.4.2"
+  }
+}

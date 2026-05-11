@@ -1,0 +1,60 @@
+{
+  "name": "1947 Championship Tennis Trophy",
+  "description": "A historic tennis trophy from 1947, awarded to champions of the annual tournament. This token represents ownership and provenance of the physical trophy, which features engraved names of all winners from 1947 to present.",
+  "image": "ipfs://YOUR_IMAGE_CID_HERE",
+  "attributes": [
+    {
+      "trait_type": "Year",
+      "value": "1947"
+    },
+    {
+      "trait_type": "Sport",
+      "value": "Tennis"
+    },
+    {
+      "trait_type": "Type",
+      "value": "Championship Trophy"
+    },
+    {
+      "trait_type": "Material",
+      "value": "Silver"
+    },
+    {
+      "trait_type": "Condition",
+      "value": "Excellent"
+    },
+    {
+      "trait_type": "Total Winners",
+      "display_type": "number",
+      "value": 77
+    },
+    {
+      "trait_type": "First Winner",
+      "value": "[Name to be added]"
+    },
+    {
+      "trait_type": "Latest Winner",
+      "value": "[Name to be added]"
+    },
+    {
+      "trait_type": "Current Custodian",
+      "value": "[Custodian name]"
+    },
+    {
+      "trait_type": "Tokenized Date",
+      "display_type": "date",
+      "value": 1715433600
+    }
+  ],
+  "winners": [
+    "1947 - [Winner Name]",
+    "1948 - [Winner Name]",
+    "1949 - [Winner Name]",
+    "1950 - [Winner Name]",
+    "...",
+    "2024 - [Winner Name]"
+  ],
+  "external_url": "https://your-dapp-url.com/trophy/1",
+  "animation_url": "",
+  "background_color": "1a1a2e"
+}
