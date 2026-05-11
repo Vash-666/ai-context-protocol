@@ -262,7 +262,87 @@
                 grid-template-columns: 1fr;
             }
         }
-    </style>
+    
+        .improvement-list {
+            margin: 20px 0;
+        }
+        
+        .improvement-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .status-indicator {
+            font-size: 1.5rem;
+            margin-right: 15px;
+            margin-top: 2px;
+        }
+        
+        .status-done {
+            color: #10b981;
+        }
+        
+        .status-in-progress {
+            color: #f59e0b;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-pending {
+            color: #6b7280;
+        }
+        
+        .improvement-item strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #1f2937;
+        }
+        
+        .improvement-item p {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        
+        .project-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .project-link {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            background: #e0e7ff;
+            color: #4f46e5;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .project-link:hover {
+            background: #4f46e5;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .project-link .icon {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+</style>
 </head>
 <body>
     <div class="container">
@@ -412,6 +492,92 @@
                 </a>
             </div>
         </div>
+        <div class="section">
+            <h2 class="section-title">🚀 New Project: Pareto Agentic Optimization</h2>
+            <div class="metrics-grid">
+                <div class="metric-card highlight">
+                    <h4>🎯 Project Goal</h4>
+                    <p class="metric-value">80% Efficiency Gains</p>
+                    <p class="metric-desc">Through 20% focused improvements (Pareto Principle)</p>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>📅 Timeline</h4>
+                    <p class="metric-value">3 Weeks</p>
+                    <p class="metric-desc">April 19 - May 9, 2026</p>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>👥 Team</h4>
+                    <p class="metric-value">3-Agent System</p>
+                    <p class="metric-desc">Switch, QualityGuardian, Content</p>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>📊 Current Status</h4>
+                    <p class="metric-value">Planning Complete</p>
+                    <p class="metric-desc">Implementation starts tomorrow</p>
+                </div>
+            </div>
+            
+            <div class="sub-section">
+                <h3>🎯 The Critical Five Improvements</h3>
+                <div class="improvement-list">
+                    <div class="improvement-item">
+                        <span class="status-indicator status-done">✅</span>
+                        <div>
+                            <strong>1. Quality Gates</strong>
+                            <p>85% reduction in late-stage rework (Week 1)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="improvement-item">
+                        <span class="status-indicator status-in-progress">🔄</span>
+                        <div>
+                            <strong>2. Batch Processing</strong>
+                            <p>50% faster processing (Week 1)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="improvement-item">
+                        <span class="status-indicator status-pending">⏳</span>
+                        <div>
+                            <strong>3. Shared Context Store</strong>
+                            <p>75% faster handoffs (Week 1)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="improvement-item">
+                        <span class="status-indicator status-pending">⏳</span>
+                        <div>
+                            <strong>4. Smart Agent Routing</strong>
+                            <p>80% overhead reduction (Week 2)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="improvement-item">
+                        <span class="status-indicator status-pending">⏳</span>
+                        <div>
+                            <strong>5. Automated Monitoring</strong>
+                            <p>70% issue reduction (Week 2)</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="project-links">
+                    <a href="#" class="project-link" onclick="alert('GitHub repository will be created tomorrow')">
+                        <span class="icon">📁</span> GitHub Repository (Coming Soon)
+                    </a>
+                    <a href="/Users/rohitvashist/.openclaw/workspace/projects/pareto-agentic-optimization/README.md" class="project-link" target="_blank">
+                        <span class="icon">📋</span> Project Charter
+                    </a>
+                    <a href="/Users/rohitvashist/.openclaw/workspace/projects/pareto-agentic-optimization/IMPLEMENTATION-PLAN.md" class="project-link" target="_blank">
+                        <span class="icon">🗓️</span> Implementation Plan
+                    </a>
+                </div>
+            </div>
+        </div>
+
         
         <div class="footer">
             <h3>🔄 Automated Tasks Tonight</h3>

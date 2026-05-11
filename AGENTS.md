@@ -21,6 +21,439 @@
 
 ---
 
+## Handoff Protocol — P003 (Updated 2026-05-05)
+
+### Default: Inline Spawn (No HANDOFF.md)
+**The spawn task IS the handoff.** Smart Router v2 classifies tasks, generates inline context, and spawns the target agent directly — all without creating, validating, or routing a separate HANDOFF.md document.
+
+**When inline spawn is sufficient:**
+- Quality audits, content creation, research, scaffolding
+- Single-agent tasks with clear scope
+- Tasks fitting in <5KB of context
+
+**Format:**
+```
+sessions_spawn(
+    agentId="agent",
+    task="[AUTO-SPAWN] Method: direct_route
+          Task: {clear one-line description}
+          Context: {2-3 sentence digest}
+          Data: {pre-computed, never ask agent to compute}
+          Handoff: inline"
+)
+```
+
+**Token savings:** ~2300 tokens per spawn (no HANDOFF.md create/read/validate cycle)
+**Auto-route rate:** 93% via Smart Router v2 (only coordination/ambiguous tasks reach @switch)
+
+### Exception: Full HANDOFF.md for Complex Tasks
+For tasks spanning 3+ agents, >5KB context, or cross-project architecture decisions:
+
+1. Create HANDOFF.md with metadata, context, artifacts, task definition, acceptance criteria, next action, blockers
+2. Validate with `agents/shared/handoff-protocol.sh validate ./HANDOFF.md`
+3. Attach to spawn
+4. Verify acceptance
+
+**Required sections:** From, To, Context Summary, Artifacts, Task Definition, Acceptance Criteria (checkboxes), Next Action, Blockers.
+
+**Template:** `agents/shared/templates/HANDOFF.md`
+
+---
+
+## Two-Tier Handoff System — P003 (Updated 2026-05-05)
+
+**Effective:** 2026-05-05
+**Purpose:** Deterministic rule for inline spawn vs. formal HANDOFF.md
+
+### Decision Tree
+
+Check top-to-bottom. First match wins.
+
+```
+START
+│
+├─ Task spans 3+ agents? ──────────YES──→ FULL HANDOFF.md
+│   NO
+├─ Context >5KB? ──────────────────YES──→ FULL HANDOFF.md
+│   NO
+├─ Cross-project dependencies? ────YES──→ FULL HANDOFF.md
+│   NO
+├─ Architecture decisions needed? ──YES──→ FULL HANDOFF.md
+│   NO
+├─ Acceptance >3 checkboxes? ──────YES──→ FULL HANDOFF.md
+│   NO
+└───────────────────────────────────→ INLINE SPAWN
+```
+
+### Inline Spawn Requirements (ALL must be true)
+- [ ] Single agent task
+- [ ] Context fits in 5KB
+- [ ] No cross-agent coordination
+- [ ] Expected < 4 hours
+- [ ] Clear acceptance (3 bullets max)
+
+### Full HANDOFF.md Requirements (ANY one triggers)
+- [ ] Multi-agent (3+)
+- [ ] Context > 5KB
+- [ ] Cross-project dependencies
+- [ ] Architecture decisions required
+- [ ] Complex acceptance (>3 checkboxes)
+
+### Inline Handoff Format (Standard 5 Fields)
+
+```
+[AUTO-SPAWN] Method: direct_route
+Task: {one clear sentence}
+Context: {2-3 sentence digest — why, what, background}
+Data: {pre-computed facts — NEVER ask agent to compute}
+Acceptance: {3 checkboxes max}
+Handoff: inline
+```
+
+**Format Rules:**
+1. **Task:** Action verb + deliverable. No ambiguity.
+2. **Context:** "Already have X, need Y because Z."
+3. **Data:** Pre-compute everything. Never "check the file."
+4. **Acceptance:** 3 checkboxes max. Verifiable.
+5. **Handoff:** Always `Handoff: inline` marker for automated processing.
+
+### Spawn Examples
+
+**Inline (correct for most tasks):**
+```python
+sessions_spawn(
+    agentId="quality",
+    task="[AUTO-SPAWN] Method: direct_route
+          Task: Score these 5 items against baseline
+          Context: Project needs quality audit. Baseline is 8.0.
+          Data: Items: [A: 8.5, B: 7.2, C: 9.0, D: 6.5, E: 8.1]
+          Acceptance:
+          - [ ] All 5 items scored 1-10
+          - [ ] Items below 8.0 flagged
+          - [ ] Recommendation summary provided
+          Handoff: inline"
+)
+```
+
+**FULL HANDOFF.md (only for complex tasks):**
+```python
+# First create HANDOFF.md with:
+# From, To, Context Summary, Artifacts, Task, Acceptance (checkboxes), Next Action, Blockers
+# Validate with: agents/shared/handoff-protocol.sh validate ./HANDOFF.md
+# Then spawn and attach
+sessions_spawn(
+    agentId="switch",
+    task="Complex multi-agent coordination — see attached HANDOFF.md"
+)
+```
+
+### Token Savings Calculation
+
+| Scenario | Tokens | vs. Baseline |
+|----------|--------|--------------|
+| Old: AGENTS.md + HANDOFF.md | ~48K | — |
+| New: Agent Brief (~1K) | ~1K | -98% |
+| New: Inline Only (~0.5K) | ~0.5K | -99% |
+| Savings per spawn (avg) | ~47.5K | 98-99% reduction |
+
+### Integration
+
+- **Smart Router v2** auto-classifies tasks and generates inline context
+- **Routine spawns** use inline format (saves ~2300 tokens vs HANDOFF.md ceremony)
+- **Context Briefs** (`agents/{agent}/brief.md`) loaded at spawn time for domain awareness
+- **Agent Directory** (`agent-directory.json`) provides identity, protocols, and constraints
+
+### Where to Find Files
+
+| Artifact | Location |
+|----------|----------|
+| Decision tree | `sprint-1/handoff-decision-tree.md` |
+| Inline format spec | `sprint-1/inline-format.md` |
+| Context briefs | `agents/{agent}/brief.md` |
+| Protocol doc | `agents/shared/spawn-protocol.md` |
+
+---
+
+## Sprint-Based Work (Mandatory) — P003
+
+**Effective:** 2026-05-05  
+**Status:** Manual validation (Weeks 1-2), then automated
+
+### Rule
+**No work proceeds without a validated SPRINT.md.** Every piece of work must be broken into 1-2 day sprints with a single measurable deliverable.
+
+### Sprint Constraints
+- **Duration:** Exactly 1 day or 2 days (no exceptions)
+- **Deliverable:** Exactly ONE measurable thing
+- **Assignment:** Exactly ONE agent per sprint
+- **Time box:** Hard stop at 4 hours — escalate if not done
+
+### Why This Matters
+- Prevents scope creep and endless tasks
+- Forces decomposition into actionable units
+- Enables independent agent work
+- Creates clear success/fail criteria
+- Reduces @switch involvement per unit of work
+
+### Sprint Lifecycle
+1. **Create** SPRINT.md from template
+2. **Validate** with `tools/sprint-validator.sh`
+3. **Assign** to agent — use inline spawn (see Handoff Protocol — no HANDOFF.md needed for single-agent sprints)
+4. **Execute** — agent works independently
+5. **Review** — @quality checks deliverable against DoD
+6. **Retro** — 5-minute retrospective (what worked/didn't)
+
+### Process
+1. **Create sprint document:**
+   ```bash
+   tools/sprint-validator.sh create ./SPRINT.md "P003-S1-Name"
+   ```
+
+2. **Fill in required fields:**
+   - Duration: `1 day` or `2 days`
+   - Single Deliverable: One sentence, specific
+   - Definition of Done: Checkboxes, verifiable
+   - Stop Conditions: Include `>4 hours` rule
+
+3. **Validate before starting:**
+   ```bash
+   tools/sprint-validator.sh validate ./SPRINT.md
+   ```
+
+4. **Begin work** — timer starts
+
+5. **Check stop conditions every hour:**
+   - If >4 hours elapsed → escalate to @switch
+   - If unclear → ask for clarification
+   - If blocked → escalate immediately
+
+6. **Complete and review** — @quality validates DoD
+
+7. **Retro** — 5-minute entry in agent journal
+
+### Required Sections
+- ✅ Metadata — Project, Sprint #, Duration, Dates, Agent
+- ✅ Single Deliverable — One sentence, measurable
+- ✅ Definition of Done — Checkboxes, specific
+- ✅ Scope — IN and OUT of scope explicit
+- ✅ Stop Conditions — Including >4 hours rule
+
+### Stop Conditions (Escalate to @switch)
+- [ ] Task takes >4 hours (scope creep detected)
+- [ ] Acceptance criteria become unclear
+- [ ] Dependencies not available
+- [ ] Quality gate blocked
+- [ ] Technical blocker requiring architecture decision
+
+### Multi-Sprint Projects
+Break into explicit sequence:
+```
+Project P002 (7 days total)
+├── Sprint 1: Foundation + Contact Form (Day 1)
+├── Sprint 2: Authentication pages (Day 2)
+├── Sprint 3: Data Table component (Day 3)
+└── Sprint 4: Integration + Testing (Day 4)
+```
+
+Each sprint gets:
+- Own SPRINT.md
+- Own HANDOFF.md (if agent changes)
+- Own Definition of Done
+- Own 5-minute retro
+
+### Time Boxing Rules
+- **Start:** Note start time in sprint
+- **Check-in:** Every hour, assess progress vs. time
+- **4-hour mark:** Hard stop — if not done, escalate
+- **End of day:** Sprint ends, whether done or not
+
+### Definition of Done Examples
+**Good:**
+```markdown
+- [ ] File exists at `agents/scaffolder/lib/injector.sh`
+- [ ] Script passes syntax check (`bash -n` returns 0)
+- [ ] AGENTS.md updated with new protocol section
+```
+
+**Bad:**
+```markdown
+- [ ] Make it work
+- [ ] Test it
+- [ ] Document it
+```
+
+### Validation Criteria
+- Duration is exactly "1 day" or "2 days"
+- Single deliverable is specific (not placeholder)
+- Definition of Done has checkboxes
+- Stop conditions include time box (>4 hours)
+- No obvious template placeholders
+
+### Enforcement
+- **Weeks 1-2:** @switch manually validates every sprint
+- **Week 3+:** Automated via `agent-router.py` (script rejects invalid sprints)
+- **Override:** @switch can bypass with `--force` (logged for review)
+
+### Template Location
+```
+agents/shared/templates/SPRINT.md
+```
+
+### Commands
+```bash
+# Create sprint from template
+tools/sprint-validator.sh create ./SPRINT.md "P003-S1-Name"
+
+# Validate sprint meets criteria
+tools/sprint-validator.sh validate ./SPRINT.md
+
+# Estimate sprint complexity
+tools/sprint-validator.sh estimate ./SPRINT.md
+```
+
+---
+
+## Agent Journal Protocol (Mandatory) — P003
+
+**Effective:** 2026-05-05  
+**Status:** Active
+
+### Rule
+**Every agent session ends with a journal entry.** Journals provide persistent, focused context for each agent's domain.
+
+### Purpose
+- Maintain domain expertise between activations
+- Capture learnings and patterns
+- Reduce repeated mistakes
+- Enable continuous improvement
+
+### Journal Location
+```
+agents/<name>/journal.md
+```
+
+### Entry Format
+Every journal entry must include:
+
+```markdown
+## YYYY-MM-DD: [Brief Task Description]
+
+**Task:** [What I was asked to do]
+**Result:** [What shipped, quality, time taken]
+
+### What Worked
+- [Pattern or approach that succeeded]
+
+### What Didn't
+- [Issue or surprise]
+
+### What I'd Do Differently
+- [Improvement for next time]
+```
+
+### When to Write
+- **End of every sprint** — Required before task marked complete
+- **After significant learning** — Even if sprint continues
+- **When pattern identified** — Something to remember for future
+
+### Journal Rules
+- **Append-only** — Never delete old entries
+- **Specific, not vague** — "STAR framework worked" not "it was good"
+- **Actionable** — Future self should know what to do differently
+- **Brief** — 5 minutes max to write
+
+### Journal Content Examples
+
+**Good entry:**
+```markdown
+## 2026-05-05: Created contact form component
+
+**Task:** Build reusable contact form with validation
+**Result:** Component shipped, 9.5/10 quality, 3 hours
+
+### What Worked
+- Zod + React Hook Form combination was clean
+- shadcn/ui Card components saved styling time
+- API route pattern from template worked first try
+
+### What Didn't
+- Template was missing Input component — had to improvise
+- Gemini API key rejected, had to switch to DeepSeek
+
+### What I'd Do Differently
+- Check template dependencies before starting
+- Have fallback model ready for all Gemini tasks
+```
+
+**Bad entry:**
+```markdown
+## 2026-05-05: Did some work
+
+**Task:** Build stuff
+**Result:** Done
+
+### What Worked
+- Everything
+
+### What Didn't
+- Nothing
+
+### What I'd Do Differently
+- Nothing
+```
+
+### Loading Journal Context
+When spawning an agent, load recent journal context:
+
+```bash
+# In spawn script
+if [[ -f "agents/${agent_name}/journal.md" ]]; then
+    journal_context=$(tail -30 "agents/${agent_name}/journal.md")
+    task="${task}
+
+## Your Recent Journal Context
+${journal_context}"
+fi
+```
+
+This gives the agent immediate domain awareness without re-reading everything.
+
+### Helper Script
+```bash
+# Add entry to agent journal
+tools/journal-updater.sh update <agent> "task" "result" "worked" "didnt" "different"
+
+# View recent entries
+tools/journal-updater.sh view <agent> [lines]
+
+# List all agent journals
+tools/journal-updater.sh list
+```
+
+### Agent Journal Checklist
+- [ ] Journal file exists at `agents/<name>/journal.md`
+- [ ] Purpose and role documented in header
+- [ ] At least one entry from recent work
+- [ ] Entries follow format (What Worked / Didn't / Differently)
+- [ ] Journal context loaded at spawn time
+
+### Enforcement
+- **Required:** Sprint not complete without journal entry
+- **Review:** @switch checks journal exists and has recent entry
+- **Integration:** Spawn process loads journal context automatically
+- **Lightweight:** 5-minute entry, not a burden
+
+### Journal Files
+| Agent | Journal | Status |
+|-------|---------|--------|
+| @switch | `agents/switch/journal.md` | ✅ Active |
+| @product | `agents/product/journal.md` | ✅ Active |
+| @quality | `agents/quality/journal.md` | ✅ Active |
+| @content | `agents/content/journal.md` | ✅ Active |
+| @scaffolder | `agents/scaffolder/journal.md` | ✅ Active |
+
+---
+
 ## Three-Tier Model Switching Protocol
 
 **Status:** ✅ Production validated (100% context preservation)  
